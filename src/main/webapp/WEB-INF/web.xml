@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+            http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <listener>
+        <listener-class>com.hrmanagementsystem.controller.AdminInitializerListenerServlet</listener-class>
+    </listener>
+    <listener>
+        <listener-class>com.hrmanagementsystem.util.JobOfferStatusUpdater</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>UserServlet</servlet-name>
+        <servlet-class>com.hrmanagementsystem.controller.UserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/employee</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>jobOfferServlet</servlet-name>
+        <servlet-class>com.hrmanagementsystem.controller.JobOfferServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>jobOfferServlet</servlet-name>
+        <url-pattern>/jobOffer</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>applicationServlet</servlet-name>
+        <servlet-class>com.hrmanagementsystem.controller.ApplicationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>applicationServlet</servlet-name>
+        <url-pattern>/application</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>holidaysServlet</servlet-name>
+        <servlet-class>com.hrmanagementsystem.controller.HolidayServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>holidaysServlet</servlet-name>
+        <url-pattern>/holidays</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>loginFormServlet</servlet-name>
+        <servlet-class>com.hrmanagementsystem.controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>loginFormServlet</servlet-name>
+        <url-pattern>/loginForm</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>AuthorizationFilter</filter-name>
+        <filter-class>com.hrmanagementsystem.controller.AuthorizationFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthorizationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+</web-app>
