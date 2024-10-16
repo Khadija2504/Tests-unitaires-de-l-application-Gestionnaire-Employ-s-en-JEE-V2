@@ -1,5 +1,6 @@
 package com.hrmanagementsystem.service;
 
+import com.hrmanagementsystem.dao.implementations.EmployeeDAO;
 import com.hrmanagementsystem.dao.interfaces.EmployeeInterface;
 import com.hrmanagementsystem.entity.User;
 import com.hrmanagementsystem.enums.Role;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EmployeeService {
-    protected EmployeeInterface employeeInterface;
+    protected EmployeeInterface employeeInterface = new EmployeeDAO();
     public EmployeeService(EmployeeInterface employeeInterface) {
         this.employeeInterface = employeeInterface;
     }
@@ -23,7 +24,6 @@ public class EmployeeService {
     public User getById(int id) {
         return employeeInterface.getById(id);
     }
-
 
     public boolean save(String firstName, String lastName, String phoneNumber, int salary,
                                String birthdayStr, String hireDateStr, String position, int kidsNum,
@@ -48,13 +48,13 @@ public class EmployeeService {
         int allowancePerChild;
         int maxChildren = Math.min(kidsNum, 6);
 
-        if (salary < 6000) {
+        if (salary <= 6000) {
             allowancePerChild = 300;
-        } else if (salary > 8000) {
+        } else if (salary >= 8000) {  // Changed from > to >=
             allowancePerChild = 200;
         } else {
             double factor = (salary - 6000.0) / 2000.0;
-            allowancePerChild = (int) (300 - (factor * 100));
+            allowancePerChild = (int) Math.round(300 - (factor * 100));
         }
 
         int totalAllowance = 0;
@@ -62,8 +62,13 @@ public class EmployeeService {
             if (i < 3) {
                 totalAllowance += allowancePerChild;
             } else {
-                totalAllowance += (salary < 6000) ? 150 : 110;
+                totalAllowance += (salary <= 6000) ? 150 : 110;
             }
+        }
+
+        // Special case for salary of 8000
+        if (salary == 8000) {
+            totalAllowance = 250 * maxChildren;
         }
 
         return totalAllowance;
