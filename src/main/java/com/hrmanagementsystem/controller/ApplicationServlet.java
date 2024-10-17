@@ -1,15 +1,14 @@
 package com.hrmanagementsystem.controller;
 
 import com.hrmanagementsystem.dao.implementations.ApplicationDAO;
-import com.hrmanagementsystem.dao.implementations.JobOfferDAO;
 import com.hrmanagementsystem.dao.implementations.NotificationDAO;
 import com.hrmanagementsystem.dao.interfaces.ApplicationInterface;
+import com.hrmanagementsystem.dao.interfaces.EmailSenderInterface;
+import com.hrmanagementsystem.dao.interfaces.NotificationInterface;
 import com.hrmanagementsystem.entity.Application;
-import com.hrmanagementsystem.entity.JobOffer;
-import com.hrmanagementsystem.entity.Notification;
 import com.hrmanagementsystem.enums.ApplicationStatus;
 import com.hrmanagementsystem.service.ApplicationService;
-import com.hrmanagementsystem.util.EmailSender;
+import com.hrmanagementsystem.service.EmailSenderService;
 
 import javax.servlet.annotation.MultipartConfig;
 
@@ -19,18 +18,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @MultipartConfig
 public class ApplicationServlet extends HttpServlet {
     protected ApplicationInterface applicationDAO = new ApplicationDAO();
-    protected ApplicationService applicationService = new ApplicationService(applicationDAO);
+    NotificationInterface notificationDAO = new NotificationDAO();
+    EmailSenderInterface emailSenderService = new EmailSenderService();
+    protected ApplicationService applicationService = new ApplicationService(applicationDAO, notificationDAO, emailSenderService);
 
     private static final String UPLOAD_DIR = "uploads";
     @Override

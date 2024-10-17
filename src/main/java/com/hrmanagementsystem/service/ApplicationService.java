@@ -1,9 +1,8 @@
 package com.hrmanagementsystem.service;
 
-import com.hrmanagementsystem.dao.implementations.ApplicationDAO;
 import com.hrmanagementsystem.dao.implementations.JobOfferDAO;
-import com.hrmanagementsystem.dao.implementations.NotificationDAO;
 import com.hrmanagementsystem.dao.interfaces.ApplicationInterface;
+import com.hrmanagementsystem.dao.interfaces.EmailSenderInterface;
 import com.hrmanagementsystem.dao.interfaces.NotificationInterface;
 import com.hrmanagementsystem.entity.Application;
 import com.hrmanagementsystem.entity.JobOffer;
@@ -22,9 +21,12 @@ import java.util.List;
 
 public class ApplicationService {
    protected ApplicationInterface applicationInterface ;
-   protected NotificationInterface notificationInterface = new NotificationDAO();
-    public ApplicationService (ApplicationInterface applicationInterface) {
+   protected NotificationInterface notificationInterface;
+   protected EmailSenderInterface emailSenderInterface;
+    public ApplicationService (ApplicationInterface applicationInterface, NotificationInterface notificationInterface, EmailSenderInterface emailSenderInterface) {
         this.applicationInterface = applicationInterface;
+        this.notificationInterface = notificationInterface;
+        this.emailSenderInterface = emailSenderInterface;
     }
 
     public Application getById(int id) {
@@ -96,7 +98,7 @@ public class ApplicationService {
                 subject = "Application refused";
             }
 
-            EmailSender.sendEmail(candidateEmail, subject, message);
+            emailSenderInterface.sendEmail(candidateEmail, subject, message);
 
             Notification notification = new Notification(message, new Date());
             notificationInterface.save(notification);

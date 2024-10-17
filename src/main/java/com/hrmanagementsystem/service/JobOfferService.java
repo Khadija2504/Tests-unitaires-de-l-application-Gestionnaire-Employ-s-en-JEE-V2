@@ -6,21 +6,31 @@ import com.hrmanagementsystem.enums.JobOfferStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class JobOfferService {
-    private ScheduledExecutorService scheduler;
-    JobOfferInterface jobOfferInterface;
+    ScheduledExecutorService scheduler;
+    private final JobOfferInterface jobOfferInterface;
+
     public JobOfferService(JobOfferInterface jobOfferInterface) {
         this.jobOfferInterface = jobOfferInterface;
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+    }
+
+    JobOfferService(JobOfferInterface jobOfferInterface, ScheduledExecutorService scheduler) {
+        this.jobOfferInterface = jobOfferInterface;
+        this.scheduler = scheduler;
     }
 
     public JobOffer addJobOffer(String title, String description, String expiredDateStr) {
+        LocalDate expiredDate = LocalDate.parse(expiredDateStr);
         JobOffer jobOffer = new JobOffer(title, description, LocalDateTime.now(),
-                LocalDate.parse(expiredDateStr).atStartOfDay(),
+                expiredDate.atStartOfDay(),
                 JobOfferStatus.Open);
 
         jobOfferInterface.save(jobOffer);
@@ -64,5 +74,7 @@ public class JobOfferService {
     public void delete(int id) {
         jobOfferInterface.delete(id);
     }
-
+    public void shutdown() {
+        scheduler.shutdown();
+    }
 }
