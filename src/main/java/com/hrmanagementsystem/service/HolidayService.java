@@ -74,13 +74,16 @@ public class HolidayService {
 
     private String extractFileName(Part part) {
         String contentDisp = part.getHeader("content-disposition");
+        if (contentDisp == null) {
+            throw new IllegalArgumentException("Content-Disposition header is missing");
+        }
         String[] tokens = contentDisp.split(";");
         for (String token : tokens) {
             if (token.trim().startsWith("filename")) {
                 return token.substring(token.indexOf("=") + 2, token.length() - 1);
             }
         }
-        return "";
+        throw new IllegalArgumentException("Filename not found in Content-Disposition header");
     }
 
     public List<Holiday> getAllHolidays() {
