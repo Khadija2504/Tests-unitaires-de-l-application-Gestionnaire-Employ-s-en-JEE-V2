@@ -89,20 +89,25 @@ public class EmployeeDAO implements EmployeeInterface {
         try {
             tx = em.getTransaction();
             tx.begin();
-            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
-            query.setParameter("email", user.getEmail());
-            boolean emailExists = query.getSingleResult() > 0;
 
-            if (emailExists) {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.email = :email AND u.id != :id", Long.class);
+            query.setParameter("email", user.getEmail());
+            query.setParameter("id", user.getId());
+            boolean emailExistsForOtherUser = query.getSingleResult() > 0;
+
+            if (emailExistsForOtherUser) {
                 tx.rollback();
                 return false;
             }
 
-            em.persist(user);
+            em.merge(user);
             tx.commit();
             return true;
         } catch (Exception e) {
-            em.getTransaction().rollback();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             e.printStackTrace();
             return false;
         } finally {

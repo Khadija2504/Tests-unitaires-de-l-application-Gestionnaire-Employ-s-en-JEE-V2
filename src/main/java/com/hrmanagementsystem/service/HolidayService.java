@@ -1,10 +1,12 @@
 package com.hrmanagementsystem.service;
 
 import com.hrmanagementsystem.dao.implementations.HolidayDAO;
+import com.hrmanagementsystem.dao.interfaces.EmployeeInterface;
 import com.hrmanagementsystem.dao.interfaces.HolidayInterface;
 import com.hrmanagementsystem.entity.Holiday;
 import com.hrmanagementsystem.entity.User;
 import com.hrmanagementsystem.enums.HolidayStatus;
+import com.hrmanagementsystem.enums.Role;
 
 import javax.servlet.http.Part;
 import java.io.*;
@@ -18,8 +20,10 @@ import java.util.Map;
 public class HolidayService {
     public static final String UPLOAD_DIR = "uploads";
     HolidayInterface holidayInterface;
-    public HolidayService (HolidayInterface holidayInterface) {
+    EmployeeInterface employeeInterface;
+    public HolidayService (HolidayInterface holidayInterface, EmployeeInterface employeeInterface) {
         this.holidayInterface = holidayInterface;
+        this.employeeInterface = employeeInterface;
     }
 
     public void addHoliday(String startDateStr, String endDateStr, String reason, String uploadFilePath,
@@ -94,11 +98,22 @@ public class HolidayService {
         return holidayInterface.getById(id);
     }
 
-    public void update(int holidayId, String newStatus) {
+    public void update(int holidayId, String newStatus, int id) {
         Holiday holiday = holidayInterface.getById(holidayId);
         if (holiday != null) {
             holiday.setStatus(HolidayStatus.valueOf(newStatus));
             holidayInterface.update(holiday);
+
+            User employee = employeeInterface.getById(id);
+            List<Holiday> acceptedHolidays = getAcceptedHolidaysForEmployee(employee);
+            int takenDays = calculateTotalDays(acceptedHolidays);
+            if (employee == null) {
+                throw new IllegalArgumentException("Employee not found with ID: " + id);
+            }
+            employee.setHolidays(takenDays);
+            employeeInterface.update(employee);
+            System.out.println(employee);
+            System.out.println(employeeInterface.update(employee));
         }
     }
 

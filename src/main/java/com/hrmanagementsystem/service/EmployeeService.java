@@ -1,12 +1,13 @@
 package com.hrmanagementsystem.service;
 
-import com.hrmanagementsystem.dao.implementations.EmployeeDAO;
+import com.hrmanagementsystem.dao.implementations.HolidayDAO;
 import com.hrmanagementsystem.dao.interfaces.EmployeeInterface;
+import com.hrmanagementsystem.dao.interfaces.HolidayInterface;
+import com.hrmanagementsystem.entity.Holiday;
 import com.hrmanagementsystem.entity.User;
 import com.hrmanagementsystem.enums.Role;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.persistence.NoResultException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,7 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EmployeeService {
-    protected EmployeeInterface employeeInterface = new EmployeeDAO();
+    protected EmployeeInterface employeeInterface;
+    protected HolidayInterface holidayInterface = new HolidayDAO();
     public EmployeeService(EmployeeInterface employeeInterface) {
         this.employeeInterface = employeeInterface;
     }
@@ -27,7 +29,7 @@ public class EmployeeService {
 
     public boolean save(String firstName, String lastName, String phoneNumber, int salary,
                                String birthdayStr, String hireDateStr, String position, int kidsNum,
-                               String situation, String department, String email, String password, String nssu) throws ParseException, ParseException {
+                               String situation, String department, String email, String password, String nssu) throws ParseException {
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
@@ -39,9 +41,13 @@ public class EmployeeService {
         int totalSalary = salary + familyAllowance;
 
         User user = new User(firstName, lastName, phoneNumber, salary, birthday, hireDate, position, kidsNum,
-                totalSalary, situation, department, email, hashedPassword, nssu, Role.Employee);
+                totalSalary, situation, department, email, hashedPassword, nssu, Role.Employee, 0);
 
         return employeeInterface.save(user);
+    }
+
+    public void saveAdmin(User user) {
+        employeeInterface.save(user);
     }
 
     public int calculateFamilyAllowance(int salary, int kidsNum) {
@@ -50,7 +56,8 @@ public class EmployeeService {
 
         if (salary <= 6000) {
             allowancePerChild = 300;
-        } else if (salary >= 8000) {  // Changed from > to >=
+        } else if (salary >= 8000)
+        {
             allowancePerChild = 200;
         } else {
             double factor = (salary - 6000.0) / 2000.0;
@@ -88,12 +95,29 @@ public class EmployeeService {
 
         int familyAllowance = calculateFamilyAllowance(salary, kidsNum);
         int totalSalary = salary + familyAllowance;
-
+        User employee = employeeInterface.getById(id);
+        List<Holiday> acceptedHolidays = getAcceptedHolidaysForEmployee(employee);
+        int takenDays = calculateTotalDays(acceptedHolidays);
         User user = new User(firstName, lastName, phoneNumber, salary, birthday, hireDate, position, kidsNum,
-                totalSalary, situation, department, email, password, nssu, Role.Employee);
+                totalSalary, situation, department, email, password, nssu, Role.Employee, takenDays);
         user.setId(id);
 
         return employeeInterface.update(user);
+    }
+
+    private int calculateTotalDays(List<Holiday> holidays) {
+        return holidays.stream()
+                .mapToInt(holiday -> calculateDaysBetween(holiday.getStartDate(), holiday.getEndDate()) + 1)
+                .sum();
+    }
+
+    private int calculateDaysBetween(Date startDate, Date endDate) {
+        long diff = endDate.getTime() - startDate.getTime();
+        return (int) (diff / (24 * 60 * 60 * 1000));
+    }
+
+    public List<Holiday> getAcceptedHolidaysForEmployee(User employee) {
+        return holidayInterface.getAcceptedHolidaysForEmployee(employee);
     }
 
     public double calculateFamilyAllowanceReport(User employee, int salary, int kidsNum) {
@@ -155,21 +179,32 @@ public class EmployeeService {
         return employeeInterface.getAll();
     }
 
-    public void initializeAdminUser() {
-        try {
-            User adminUser = employeeInterface.getByUsername("admin");
-            System.out.println("Admin user already exists.");
-        } catch (NoResultException e) {
-            User adminUser = new User();
-            adminUser.setFirstName("admin");
-            String hashedPassword = BCrypt.hashpw("admin123", BCrypt.gensalt());
-            adminUser.setPassword(hashedPassword);
-            adminUser.setEmail("admin@example.com");
-            adminUser.setRole(Role.Admin);
-
-            employeeInterface.save(adminUser);
-            System.out.println("Default admin user created.");
-        }
+    public boolean getByEmail(String email) {
+        return employeeInterface.getByEmail(email);
     }
+
+    public User getByUsername(String username) {
+        return employeeInterface.getByUsername(username);
+    }
+
+    public User findByNssu(String nssu) {
+        return employeeInterface.findByNssu(nssu);
+    }
+//    public void initializeAdminUser() {
+//        try {
+//            User adminUser = employeeInterface.getByUsername("admin");
+//            System.out.println("Admin user already exists.");
+//        } catch (NoResultException e) {
+//            User adminUser = new User();
+//            adminUser.setFirstName("admin");
+//            String hashedPassword = BCrypt.hashpw("admin123", BCrypt.gensalt());
+//            adminUser.setPassword(hashedPassword);
+//            adminUser.setEmail("admin@example.com");
+//            adminUser.setRole(Role.Admin);
+//
+//            employeeInterface.save(adminUser);
+//            System.out.println("Default admin user created.");
+//        }
+//    }
 
 }

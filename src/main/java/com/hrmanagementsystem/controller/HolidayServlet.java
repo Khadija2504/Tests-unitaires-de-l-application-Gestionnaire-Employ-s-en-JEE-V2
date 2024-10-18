@@ -19,8 +19,8 @@ import java.util.Map;
 @MultipartConfig
 public class HolidayServlet extends HttpServlet {
     protected HolidayInterface holidayDAO = new HolidayDAO();
-    protected HolidayService holidayService = new HolidayService(holidayDAO);
     protected EmployeeInterface employeeDAO = new EmployeeDAO();
+    protected HolidayService holidayService = new HolidayService(holidayDAO, employeeDAO);
     protected EmployeeService employeeService = new EmployeeService(employeeDAO);
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -145,9 +145,10 @@ public class HolidayServlet extends HttpServlet {
     private void updateHoliday(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int holidayId = Integer.parseInt(req.getParameter("holidayId"));
         String newStatus = req.getParameter("status");
+        Integer loggedInUserId = (Integer) req.getSession().getAttribute("loggedInUserId");
 
         try {
-            holidayService.update(holidayId, newStatus);
+            holidayService.update(holidayId, newStatus, loggedInUserId);
             resp.sendRedirect("holidays?action=getAllHolidays");
         } catch (IllegalArgumentException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid status");

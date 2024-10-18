@@ -9,6 +9,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -134,7 +137,8 @@ class EmployeeServiceTest {
             "9000, 4, 710",
             "6000, 6, 1350",
             "8000, 6, 1500",
-            "10000, 0, 0"
+            "10000, 0, 0",
+            "8000, 8, 1500"
     })
     void testCalculateFamilyAllowanceDirectly(int salary, int kidsNum, int expectedAllowance) {
         EmployeeService service = new EmployeeService(null);
@@ -142,5 +146,78 @@ class EmployeeServiceTest {
         assertEquals(expectedAllowance, actualAllowance,
                 String.format("For salary %d and %d kids, expected %d but got %d",
                         salary, kidsNum, expectedAllowance, actualAllowance));
+    }
+
+    @Test
+    void testGetByEmail() {
+        // Arrange
+        String email = "test@example.com";
+        when(employeeInterface.getByEmail(email)).thenReturn(true);
+
+        // Act
+        boolean result = employeeService.getByEmail(email);
+
+        // Assert
+        assertTrue(result);
+        verify(employeeInterface).getByEmail(email);
+    }
+
+    @Test
+    void testGetByUsername() {
+        // Arrange
+        String username = "johndoe";
+        User expectedUser = new User();
+        expectedUser.setFirstName("John");
+        expectedUser.setLastName("Doe");
+        when(employeeInterface.getByUsername(username)).thenReturn(expectedUser);
+
+        // Act
+        User result = employeeService.getByUsername(username);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+        verify(employeeInterface).getByUsername(username);
+    }
+
+    @Test
+    void testGetAll() {
+        List<User> expectedUsers = Arrays.asList(
+                new User("John", "Doe", "1234567890", 5000, null, null, "Developer", 2, 5600, "Married", "IT", "john@example.com", "password", "123456", Role.Employee, 0),
+                new User("Jane", "Smith", "0987654321", 6000, null, null, "Manager", 1, 6300, "Single", "HR", "jane@example.com", "password", "654321", Role.Employee, 0)
+        );
+        when(employeeInterface.getAll()).thenReturn(expectedUsers);
+
+        // Act
+        List<User> result = employeeService.getAll();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("John", result.get(0).getFirstName());
+        assertEquals("Jane", result.get(1).getFirstName());
+        verify(employeeInterface).getAll();
+    }
+
+    @Test
+    void testFindByNssu() {
+        // Arrange
+        String nssu = "123456";
+        User expectedUser = new User();
+        expectedUser.setFirstName("John");
+        expectedUser.setLastName("Doe");
+        expectedUser.setNssu(nssu);
+        when(employeeInterface.findByNssu(nssu)).thenReturn(expectedUser);
+
+        // Act
+        User result = employeeService.findByNssu(nssu);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+        assertEquals(nssu, result.getNssu());
+        verify(employeeInterface).findByNssu(nssu);
     }
 }

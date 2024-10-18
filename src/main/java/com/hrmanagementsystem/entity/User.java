@@ -30,10 +30,11 @@ public class User {
     private String nssu;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private int holidays;
 
     public User() {}
 
-    public User(String firstName, String lastName, String phoneNumber, int salary, Date birthday, Date hireDate, String position, int kidsNum, int totalSalary, String situation, String department, String email, String password, String nssu, Role role) {
+    public User(String firstName, String lastName, String phoneNumber, int salary, Date birthday, Date hireDate, String position, int kidsNum, int totalSalary, String situation, String department, String email, String password, String nssu, Role role, int holidays) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
@@ -49,6 +50,7 @@ public class User {
         this.password = password;
         this.nssu = nssu;
         this.role = role;
+        this.holidays = holidays;
     }
 
     public boolean authenticate(String email, String password) {
@@ -176,6 +178,14 @@ public class User {
 
     public void setNssu(String nssu) {
         this.nssu = nssu;
+    }
+
+    public int getHolidays() {
+        return holidays;
+    }
+
+    public void setHolidays(int holidays) {
+        this.holidays = holidays;
     }
 }
 

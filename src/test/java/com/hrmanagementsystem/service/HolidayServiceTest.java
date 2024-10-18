@@ -1,6 +1,8 @@
 package com.hrmanagementsystem.service;
 
+import com.hrmanagementsystem.dao.interfaces.EmployeeInterface;
 import com.hrmanagementsystem.dao.interfaces.HolidayInterface;
+import com.hrmanagementsystem.dao.interfaces.UserInterface;
 import com.hrmanagementsystem.entity.Holiday;
 import com.hrmanagementsystem.entity.User;
 import com.hrmanagementsystem.enums.HolidayStatus;
@@ -26,13 +28,16 @@ class HolidayServiceTest {
     private HolidayInterface holidayInterface;
 
     @Mock
+    private EmployeeInterface employeeInterface;
+
+    @Mock
     private Part filePart;
 
     private HolidayService holidayService;
 
     @BeforeEach
     void setUp() {
-        holidayService = new HolidayService(holidayInterface);
+        holidayService = new HolidayService(holidayInterface, employeeInterface);
     }
 
     @Test
@@ -139,9 +144,10 @@ class HolidayServiceTest {
         int holidayId = 1;
         String newStatus = "Approved";
         Holiday holiday = new Holiday();
+        int id = 1;
         when(holidayInterface.getById(holidayId)).thenReturn(holiday);
 
-        holidayService.update(holidayId, newStatus);
+        holidayService.update(holidayId, newStatus, id);
 
         assertEquals(HolidayStatus.Approved, holiday.getStatus());
         verify(holidayInterface).update(holiday);

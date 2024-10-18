@@ -3,6 +3,7 @@ package com.hrmanagementsystem.controller;
 import com.hrmanagementsystem.dao.implementations.EmployeeDAO;
 import com.hrmanagementsystem.dao.interfaces.EmployeeInterface;
 import com.hrmanagementsystem.service.EmployeeService;
+import com.hrmanagementsystem.util.AdminInitializer;
 import com.hrmanagementsystem.util.PersistenceUtil;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,7 @@ import javax.servlet.ServletContextListener;
 public class AdminInitializerListenerServlet implements ServletContextListener {
     protected EmployeeInterface EmployeeDAO = new EmployeeDAO();
     protected EmployeeService employeeService = new EmployeeService(EmployeeDAO);
+    protected AdminInitializer adminInitializer = new AdminInitializer(employeeService);
 
     private EntityManagerFactory emf;
 
@@ -21,7 +23,7 @@ public class AdminInitializerListenerServlet implements ServletContextListener {
         emf = PersistenceUtil.getEntityFactory();
         EntityManager em = emf.createEntityManager();
         try {
-            employeeService.initializeAdminUser();
+            adminInitializer.initializeAdminUser();
         } finally {
             em.close();
         }
